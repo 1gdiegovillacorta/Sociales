@@ -1,0 +1,11 @@
+/*CSS*/
+
+.option-container img {
+  width: 230px;
+  height: 230px;
+  filter: drop-shadow(0.35rem 0.35rem 0.4rem rgba(0, 0, 0, 0.5));
+}
+
+h2 {
+  filter: drop-shadow(0.35rem 0.35rem 0.4rem rgba(0, 0, 0, 0.5));
+}
