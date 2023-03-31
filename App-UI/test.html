@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Expense Tracker</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+  </head>
+  <body onload="showExpenses()">
+    <style>
+      .btn {
+        margin-bottom: 5px;
+        width: 100%;
+      }
+
+      .scale-in-center {
+        -webkit-animation: scale-in-center 0.7s linear both;
+        animation: scale-in-center 0.7s linear both;
+      }
+
+      a {
+        color: white;
+      }
+
+      a:hover {
+        color: white;
+      }
+
+      @-webkit-keyframes scale-in-center {
+        0% {
+          -webkit-transform: scale(0);
+          transform: scale(0);
+          opacity: 1;
+        }
+        100% {
+          -webkit-transform: scale(1);
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      @keyframes scale-in-center {
+        0% {
+          -webkit-transform: scale(0);
+          transform: scale(0);
+          opacity: 1;
+        }
+        100% {
+          -webkit-transform: scale(1);
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .btn-purple {
+        background-color: #2d3142;
+        color: white;
+      }
+
+      .btn-purple:hover {
+        color: white;
+      }
+    </style>
+    <header
+      class="col-xl sticky-top"
+      style="
+        background-color: #2d3142;
+        color: white;
+        text-align: center;
+        font-size: 25px;
+        padding: 1.5px 0px 1.5px 0px;
+        margin-bottom: 20px;
+      "
+    >
+      <h1 class="scale-in-center">
+        <a class="text-decoration-none color-white" href="./test.html"
+          >Expense Tracker</a
+        >
+      </h1>
+    </header>
+    <div class="container">
+      <div class="text-center">
+        <img src="./icon.svg" width="250" height="250" alt="" />
+        <h2>Basic Expenses</h2>
+      </div>
+      <div class="row">
+        <div class="col-md-8 mx-auto">
+          <form onsubmit="return addExpense()" autocomplete="off">
+            <input type="hidden" id="editIndex" />
+            <div class="form-group">
+              <label for="category">Name:</label>
+              <input type="text" id="category" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label for="date">Date:</label>
+              <input type="date" id="date" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label for="amount">Amount:</label>
+              <input type="number" id="amount" class="form-control" required />
+            </div>
+            <button type="submit" id="addButton" class="btn btn-purple">
+              Add Expense
+            </button>
+          </form>
+          <br />
+          <table class="table" id="expenseTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Amount ($)</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // add expense to table and local storage
+      function addExpense() {
+        var date = document.getElementById("date").value;
+        var category = document.getElementById("category").value;
+        var amount = document.getElementById("amount").value;
+        var editIndex = document.getElementById("editIndex").value;
+
+        if (editIndex === "") {
+          var expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+          expenses.push({ date: date, category: category, amount: amount });
+          localStorage.setItem("expenses", JSON.stringify(expenses));
+          var tableBody = document
+            .getElementById("expenseTable")
+            .getElementsByTagName("tbody")[0];
+          var row =
+            "<tr><td>" +
+            category +
+            "</td><td>" +
+            date +
+            "</td><td>" +
+            amount +
+            '</td><td><button type="button" class="btn btn-sm btn-purple  " onclick="editForm(this.parentNode.parentNode)">Edit</button> <button type="button" class="btn btn-sm btn-danger" onclick="deleteExpense(this.parentNode.parentNode)">Delete</button></td></tr>';
+          tableBody.insertAdjacentHTML("beforeend", row);
+        } else {
+          editExpense(editIndex, date, category, amount);
+        }
+
+        resetForm();
+        return false;
+      }
+
+      // reset the form
+      function resetForm() {
+        document.getElementById("date").value = "";
+        document.getElementById("category").value = "";
+        document.getElementById("amount").value = "";
+        document.getElementById("editIndex").value = "";
+        document.getElementById("addButton").innerHTML = "Add Expense";
+      }
+
+      // delete expense from table and local storage
+      function deleteExpense(row) {
+        row.parentNode.removeChild(row);
+        var expenses = JSON.parse(localStorage.getItem("expenses"));
+        var rowIndex = row.rowIndex - 1;
+        expenses.splice(rowIndex, 1);
+        localStorage.setItem("expenses", JSON.stringify(expenses));
+      }
+
+      // edit expense in form
+      function editForm(row) {
+        var rowIndex = row.rowIndex - 1;
+        var expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+        var expense = expenses[rowIndex];
+        document.getElementById("date").value = expense.date;
+        document.getElementById("category").value = expense.category;
+        document.getElementById("amount").value = expense.amount;
+        document.getElementById("editIndex").value = rowIndex;
+        document.getElementById("addButton").innerHTML = "Update Expense";
+      }
+
+      // edit expense in table and local storage
+      function editExpense(index, date, category, amount) {
+        var expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+        expenses[index] = { date: date, category: category, amount: amount };
+        localStorage.setItem("expenses", JSON.stringify(expenses));
+        var tableRow = document.getElementById("expenseTable").rows[index + 1];
+        tableRow.cells[0].innerHTML = category;
+        tableRow.cells[1].innerHTML = date;
+        tableRow.cells[2].innerHTML = amount;
+        resetForm();
+      }
+
+      // show expenses in table
+      function showExpenses() {
+        var expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+        var tableBody = document
+          .getElementById("expenseTable")
+          .getElementsByTagName("tbody")[0];
+        for (var i = 0; i < expenses.length; i++) {
+          var expense = expenses[i];
+          var row =
+            "<tr><td>" +
+            expense.category +
+            "</td><td>" +
+            expense.date +
+            "</td><td>" +
+            expense.amount +
+            '</td><td><button type="button" class="btn btn-sm btn-purple  " onclick="editForm(this.parentNode.parentNode)">Edit</button> <button type="button" class="btn btn-sm btn-danger  " onclick="deleteExpense(this.parentNode.parentNode)">Delete</button></td></tr>';
+          tableBody.insertAdjacentHTML("beforeend", row);
+        }
+      }
+    </script>
+  </body>
+</html>
